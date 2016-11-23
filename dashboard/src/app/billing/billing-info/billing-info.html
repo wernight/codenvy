@@ -1,0 +1,87 @@
+<div class="billing-info">
+  <!-- Credit card -->
+  <div>
+    <che-label-container che-label-name="Credit Card"></che-label-container>
+  </div>
+  <!-- add new card -->
+  <div ng-if="!billingInfoController.creditCard.token">
+    <div class="billing-info-text">Add your credit card to your account:</div>
+    <ng-form name="billingInfoForm">
+      <add-credit-card credit-card="billingInfoController.creditCard"></add-credit-card>
+    </ng-form>
+  </div>
+  <!-- show existing card -->
+  <div ng-if="billingInfoController.creditCard.token"
+       class="billing-info-credit-card">
+    <div class="billing-info-cardholder">{{billingInfoController.creditCard.cardholder}}</div>
+    <div>{{billingInfoController.creditCard.type}}&nbsp;&hellip;{{billingInfoController.creditCard.number.slice(-4)}}&nbsp;({{billingInfoController.creditCard.expirationDate}})</div>
+  </div>
+
+  <!-- Billing information -->
+  <div>
+    <che-label-container che-label-name="Billing Information"></che-label-container>
+  </div>
+  <div class="billing-info-text">Update your billing information for invoices:</div>
+  <ng-form name="billingInfoForm">
+    <!-- street address -->
+    <che-input che-form="billingInfoForm"
+               che-label-name="Street Address"
+               che-name="streetAddress"
+               che-place-holder=""
+               aria-label="Street address"
+               ng-model="billingInfoController.creditCard.streetAddress"
+               ng-change="billingInfoController.infoChanged(billingInfoForm.$valid)"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">A street address is required.</div>
+      <div ng-message="maxlength">The street address has to be less than 128 characters long.</div>
+    </che-input>
+    <!-- city -->
+    <che-input che-form="billingInfoForm"
+               che-label-name="City"
+               che-name="city"
+               che-place-holder=""
+               aria-label="City"
+               ng-model="billingInfoController.creditCard.city"
+               ng-change="billingInfoController.infoChanged(billingInfoForm.$valid)"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">A city name is required.</div>
+      <div ng-message="maxlength">The city name has to be less than 128 characters long.</div>
+    </che-input>
+    <!-- state -->
+    <che-input che-form="billingInfoForm"
+               che-label-name="State"
+               che-name="state"
+               che-place-holder=""
+               aria-label="State"
+               ng-model="billingInfoController.creditCard.state"
+               ng-change="billingInfoController.infoChanged(billingInfoForm.$valid)"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">A state name is required.</div>
+      <div ng-message="maxlength">The state name has to be less than 128 characters long.</div>
+    </che-input>
+    <!-- country -->
+    <che-select che-form="billingInfoForm"
+                che-name="country"
+                che-label-name="Country"
+                che-place-holder=""
+                ng-change="billingInfoController.infoChanged(billingInfoForm.$valid)"
+                ng-model="billingInfoController.creditCard.country"
+                che-value="billingInfoController.creditCard.country"
+                che-option-values="billingInfoController.countries"
+                required>
+      <div ng-message="required">A country is required.</div>
+    </che-select>
+  </ng-form>
+
+  <!-- Delete billing info -->
+  <che-label-container ng-if="billingInfoController.creditCard.token"
+                       class="workspace-details-delete-label"
+                       che-label-name="Delete Billing Info"
+                       che-label-description="This is irreversible. It will also delete all teams you have setup.">
+    <che-button-danger che-button-title="Delete"
+                       ng-click="billingInfoController.deleteCard($event)"></che-button-danger>
+  </che-label-container>
+</div>
