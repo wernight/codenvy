@@ -30,18 +30,18 @@
         </md-tab-body>
       </md-tab>
 
-      <!-- Billing info tab -->
+      <!-- Card tab -->
       <md-tab>
         <md-tab-label>
           <md-icon md-font-icon="fa-cc-mastercard" class="fa che-tab-label-icon"></md-icon>
-          <span class="che-tab-label-title">Billing info</span>
+          <span class="che-tab-label-title">Card</span>
         </md-tab-label>
         <md-tab-body>
-          <ng-form name="billingInfoForm">
-            <billing-info ng-init="billingController.setInfoForm(billingInfoForm)"
+          <ng-form name="cardInfoForm">
+            <card-info ng-init="billingController.setInfoForm(cardInfoForm)"
                           credit-card="billingController.creditCard"
                           credit-card-on-change="billingController.creditCardChanged(creditCard)"
-                          credit-card-on-delete="billingController.creditCardDeleted()"></billing-info>
+                          credit-card-on-delete="billingController.creditCardDeleted()"></card-info>
           </ng-form>
         </md-tab-body>
       </md-tab>

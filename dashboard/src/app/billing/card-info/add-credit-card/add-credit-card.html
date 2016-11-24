@@ -31,17 +31,17 @@
       </che-input>
       <!-- expirationDate -->
       <che-input che-form="addCreditCardForm"
-                 che-label-name="Expires"
+                 che-label-name="Expiration"
                  che-name="expires"
                  che-place-holder="**/**"
-                 aria-label="Expires"
+                 aria-label="Expiration"
                  ng-model="addCreditCardController.creditCard.expirationDate"
                  required
                  ng-pattern="/^\d{2}\s?\/\s?(?:\d{2}|\d{4})$/">
-        <div ng-message="required">An expires value is required.</div>
-        <div ng-message="pattern">A valid expires value is required.</div>
+        <div ng-message="required">An expiration date is required.</div>
+        <div ng-message="pattern">A valid expiration date is required.</div>
       </che-input>
-      <!-- cvv -->
+      <!-- CVV -->
       <che-input che-form="addCreditCardForm"
                  che-label-name="CVV"
                  che-name="cvv"
@@ -52,17 +52,17 @@
                  ng-minlength="3"
                  ng-maxlength="4"
                  ng-pattern="/^\d{3,4}$/">
-        <div ng-message="required">A cvv code is required.</div>
-        <div ng-message="maxlength">The cvv code has to be less than 4 digits long.</div>
-        <div ng-message="minlength">The cvv code has to be more than 3 digits long.</div>
-        <div ng-message="pattern">A valid cvv code is required.</div>
+        <div ng-message="required">A CVV code is required.</div>
+        <div ng-message="maxlength">The CVV code has to be less than 4 digits long.</div>
+        <div ng-message="minlength">The CVV code has to be more than 3 digits long.</div>
+        <div ng-message="pattern">A valid CVV code is required.</div>
       </che-input>
       <!-- post code -->
       <che-input che-form="addCreditCardForm"
-                 che-label-name="Post Code"
+                 che-label-name="Postal Code"
                  che-name="postcode"
                  che-place-holder="***"
-                 aria-label="Post code"
+                 aria-label="Postal code"
                  ng-model="addCreditCardController.creditCard.postcode"
                  required
                  ng-minlength="3"

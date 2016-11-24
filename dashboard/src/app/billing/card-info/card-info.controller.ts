@@ -15,7 +15,7 @@
 'use strict';
 import {ICreditCard, CodenvyPayment} from '../../../components/api/codenvy-payment.factory';
 
-export class BillingInfoController {
+export class CardInfoController {
   codenvyPayment: CodenvyPayment;
 
   creditCard: ICreditCard;
@@ -37,9 +37,9 @@ export class BillingInfoController {
   }
 
   /**
-   * Callback when billing information has been changed.
+   * Callback when card or billing information has been changed.
    *
-   * @param isFormValid {Boolean} true if billingInfoForm is valid
+   * @param isFormValid {Boolean} true if cardInfoForm is valid
    */
   infoChanged(isFormValid: boolean): void {
     this.creditCardOnChange({creditCard: this.creditCard});

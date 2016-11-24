@@ -15,18 +15,18 @@
 'use strict';
 
 /**
- * Defines a directive for creating a billing information page.
+ * Defines a directive for creating a card information page.
  * @author Oleksii Kurinnyi
  */
-export class BillingInfo {
+export class CardInfo {
   restrict: string = 'E';
   replace: boolean = false;
-  templateUrl: string = '/app/billing/billing-info/billing-info.html';
+  templateUrl: string = '/app/billing/card-info/card-info.html';
 
   bindToController: boolean = true;
 
-  controller: string = 'BillingInfoController';
-  controllerAs: string = 'billingInfoController';
+  controller: string = 'CardInfoController';
+  controllerAs: string = 'cardInfoController';
 
   scope: {
     [propName: string]: string

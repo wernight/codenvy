@@ -18,7 +18,7 @@
 'use strict';
 import {CodenvyPayment, ICreditCard} from '../../components/api/codenvy-payment.factory';
 
-enum Tab {Summary, BillingInfo, Invoices}
+enum Tab {Summary, Card, Invoices}
 
 export class BillingController {
   $log: ng.ILogService;
@@ -29,7 +29,7 @@ export class BillingController {
 
   creditCard: ICreditCard;
   origCreditCard: ICreditCard;
-  billingInfoForm: ng.IFormController;
+  cardInfoForm: ng.IFormController;
   selectedTabIndex: number;
   accountId: string;
   loading: boolean = true;
@@ -112,7 +112,7 @@ export class BillingController {
   }
 
   /**
-   * Updates billing information of existing credit card.
+   * Deletes existing credit card.
    */
   creditCardDeleted(): void {
     this.loading = true;
@@ -149,28 +149,28 @@ export class BillingController {
   }
 
   /**
-   * Cancels billing info and credit card changes
+   * Cancels credit card information changes
    */
   cancelCard(): void {
     this.creditCard = angular.copy(this.origCreditCard);
   }
 
   /**
-   * Register billing info form
+   * Register card info form
    *
    * @param form {ng.IFormController}
    */
   setInfoForm(form: ng.IFormController): void {
-    this.billingInfoForm = form;
+    this.cardInfoForm = form;
   }
 
   /**
-   * Returns true if form on Billing Info tab is valid
+   * Returns true if form on Card tab is valid
    *
    * @return {boolean}
    */
   isSaveButtonDisabled(): boolean {
-    return !(this.billingInfoForm && this.billingInfoForm.$valid)
+    return !(this.cardInfoForm && this.cardInfoForm.$valid)
       || angular.equals(this.creditCard, this.origCreditCard);
   }
 
@@ -180,6 +180,6 @@ export class BillingController {
    * @return {boolean}
    */
   isSaveButtonVisible(): boolean {
-    return this.selectedTabIndex === Tab.BillingInfo && !this.loading;
+    return this.selectedTabIndex === Tab.Card && !this.loading;
   }
 }

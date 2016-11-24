@@ -16,10 +16,10 @@
 
 import {Billing} from './billing.directive';
 import {BillingController} from './billing.controller';
-import {BillingInfo} from './billing-info/billing-info.directive';
-import {BillingInfoController} from './billing-info/billing-info.controller';
-import {AddCreditCardController} from './billing-info/add-credit-card/add-credit-card.controller';
-import {AddCreditCard} from './billing-info/add-credit-card/add-credit-card.directive';
+import {CardInfo} from './card-info/card-info.directive';
+import {CardInfoController} from './card-info/card-info.controller';
+import {AddCreditCardController} from './card-info/add-credit-card/add-credit-card.controller';
+import {AddCreditCard} from './card-info/add-credit-card/add-credit-card.directive';
 
 export class BillingConfig {
 
@@ -27,8 +27,8 @@ export class BillingConfig {
     register.controller('BillingController', BillingController);
     register.directive('billing', Billing);
 
-    register.controller('BillingInfoController', BillingInfoController);
-    register.directive('billingInfo', BillingInfo);
+    register.controller('CardInfoController', CardInfoController);
+    register.directive('cardInfo', CardInfo);
 
     register.controller('AddCreditCardController', AddCreditCardController);
     register.directive('addCreditCard', AddCreditCard);
