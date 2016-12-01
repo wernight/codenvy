@@ -44,10 +44,11 @@ define(["jquery","models/account","views/form","validation"],
                 invalidEmailErrorMessage : "Emails with '+' and '/' are not allowed",
                 invalidDomainNameErrorMessage : "Your workspace name should start with a Latin letter or a digit, and must only contain Latin letters, digits, underscores, dots or dashes. You are allowed to use from 3 to 20 characters in a workspace name.",
                 notSecuredPassword : "Password should contain between 8-100 characters, both letters and digits",
-                invalidUserName : "Please enter no more than 35 characters.",
+                invalidUserName : "Please enter no more than 35 characters",
                 noFirstNameErrorMessage : "Please enter your first name",
                 noLastNameErrorMessage : "Please enter your last name",
-            },
+                noEmailAddressErrorMessage : "Please enter your e-mail address",
+                maxlengthExceeded : "Please enter no more than 254 characters"            },
 
             __validationRules : function(){
                 return {
@@ -62,7 +63,12 @@ define(["jquery","models/account","views/form","validation"],
                 return {
                     email: {
                         required : this.settings.noUserNameErrorMessage,
-                        checkEmail : this.settings.invalidEmailErrorMessage
+                        checkEmail : this.settings.invalidEmailErrorMessage,
+                    },
+                    adminEmail: {
+                        required : this.settings.noEmailAddressErrorMessage,
+                        checkEmail : this.settings.invalidEmailErrorMessage,
+                        maxlength : this.settings.maxlengthExceeded
                     },
                     password: {
                         required: this.settings.noPasswordErrorMessage,

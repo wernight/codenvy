@@ -19,7 +19,6 @@
 define(["jquery","underscore", "views/accountformbase","models/account"],
 
     function($,_,AccountFormBase,Account){
-
         var AcceptLicencePage = AccountFormBase.extend({
 
         	initialize : function(attributes){
@@ -36,11 +35,11 @@ define(["jquery","underscore", "views/accountformbase","models/account"],
                         required: true,
                         maxlength: 35
                     },
-                    email: {
+                    adminEmail: {
                     	required: true,
                     	email: true,
-                    	maxlength: 254,
-                    	validEmail: true
+                    	checkEmail: true,
+                        maxlength: 254
                     }
                 };
             },

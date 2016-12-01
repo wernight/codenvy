@@ -24,7 +24,7 @@ define(["jquery","config",
         "views/onpremises-login",
         "views/factory-usage-notification",
         "views/login",
-        "views/accept-fair-source-licence"
+        "views/accept-fair-source-license"
         ],
 
     function($,Config,
