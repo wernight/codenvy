@@ -19,7 +19,7 @@
 define(["jquery","underscore", "views/accountformbase","models/account"],
 
     function($,_,AccountFormBase,Account){
-        var AcceptLicencePage = AccountFormBase.extend({
+        var AcceptLicensePage = AccountFormBase.extend({
 
         	initialize : function(attributes){
         		AccountFormBase.prototype.initialize.apply(this,attributes);
@@ -57,10 +57,10 @@ define(["jquery","underscore", "views/accountformbase","models/account"],
                 if(typeof form === 'undefined'){
                     throw new Error("Need a form");
                 }
-                return new AcceptLicencePage({el:form});
+                return new AcceptLicensePage({el:form});
             },
 
-            AcceptLicencePage : AcceptLicencePage
+            AcceptLicensePage : AcceptLicensePage
         };
     }
 );

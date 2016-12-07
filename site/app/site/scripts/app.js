@@ -35,7 +35,7 @@ define(["jquery","config",
         OnPremisesLogin,
         FactoryUsageNotification,
         MainPage,
-        AcceptLicencePage){
+        AcceptLicensePage){
 
         function modernize(){
             Modernizr.load({
@@ -65,11 +65,11 @@ define(["jquery","config",
                         onpremloginForm = $(".onpremloginForm"),
                         factoryUsageNotification =  $(".factory-notification"),
                         mainpage = $(".main-page"),
-                        acceptLicencePage = $(".accept-licence-form");
+                        acceptLicensePage = $(".accept-license-form");
 
-                    if(acceptLicencePage.length !== 0){
+                    if(acceptLicensePage.length !== 0){
                         (function(){
-                            var form = AcceptLicencePage.get(acceptLicencePage);
+                            var form = AcceptLicensePage.get(acceptLicensePage);
                             errorReport = ErrorReport.get(errorContainer);
                             form.on("invalid", function(field,message){
                                 errorReport.show(message);

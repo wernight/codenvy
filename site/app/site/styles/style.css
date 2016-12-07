@@ -166,7 +166,7 @@ body,h1,h2,h3,h4,h5,h6,a{
 .signup-page input[type="text"]:focus,.signup-page input[type="email"]:focus,.signup-page input[type="password"]:focus{
 	background:#597FA0;
 }
-.accept-licence-page input[type="text"],.accept-licence-page input[type="email"], .accept-licence-page input[type="password"]{
+.accept-license-page input[type="text"],.accept-license-page input[type="email"], .accept-license-page input[type="password"]{
 	margin-bottom: 10px;
 	width:400px;
 	color: #fff;
@@ -322,7 +322,7 @@ body,h1,h2,h3,h4,h5,h6,a{
 .relative:hover .icon-over{
 	opacity:0;
 }
-.licence-text{
+.license-text{
 	overflow-y:scroll;
 	overflow-x:auto;
 	height:400px;
@@ -336,7 +336,7 @@ body,h1,h2,h3,h4,h5,h6,a{
 	-ms-user-select: none; /* Internet Explorer/Edge */
 }
 
-.licence-text p {
+.license-text p {
     font-size: 14px;
     line-height: 20px;
     font-weight: 300;
@@ -344,11 +344,11 @@ body,h1,h2,h3,h4,h5,h6,a{
     color: #ADB0B5;
     text-align: justify;
 }
-.accept-licence-page {
+.accept-license-page {
 	color: #fff;
 }
 
-.accept-licence-page input[type="submit"] {
+.accept-license-page input[type="submit"] {
     padding: 10px 10px;
     margin: 20px;
     border-radius: 5px;
@@ -375,7 +375,7 @@ body,h1,h2,h3,h4,h5,h6,a{
 	  display: block;
 	  margin-bottom:10px;
 	}
-	.licence-text{
+	.license-text{
 		width: 100%;
 	}
 	.br{
@@ -435,7 +435,7 @@ body,h1,h2,h3,h4,h5,h6,a{
 		display:block;
 		margin-left:0px;
 	}
-	.licence-text{
+	.license-text{
 		width: 100%;
 	}
 	.br{
