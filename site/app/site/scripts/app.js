@@ -78,7 +78,7 @@ define(["jquery","config",
                                 errorReport.hide();
                             });
                         }());
-                        
+
                     }
 
                     if(factoryUsageNotification.length !== 0){

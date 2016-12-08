@@ -61,14 +61,10 @@ define(["jquery","models/account","views/form","validation"],
 
             __validationMessages : function(){
                 return {
+
                     email: {
-                        required : this.settings.noUserNameErrorMessage,
-                        checkEmail : this.settings.invalidEmailErrorMessage,
-                    },
-                    adminEmail: {
                         required : this.settings.noEmailAddressErrorMessage,
                         checkEmail : this.settings.invalidEmailErrorMessage,
-                        maxlength : this.settings.maxlengthExceeded
                     },
                     password: {
                         required: this.settings.noPasswordErrorMessage,
@@ -85,7 +81,12 @@ define(["jquery","models/account","views/form","validation"],
                     lastName: {
                         required: this.settings.noLastNameErrorMessage,
                         maxlength: this.settings.invalidUserName,
-                    }
+                    },
+                    adminEmail: {
+                        required : this.settings.noEmailAddressErrorMessage,
+                        checkEmail : this.settings.invalidEmailErrorMessage,
+                        maxlength : this.settings.maxlengthExceeded
+                    },
                 };
             },
 
@@ -94,6 +95,29 @@ define(["jquery","models/account","views/form","validation"],
                     el.focus();
                 }
                 /*this.validator.defaultShowErrors();*/
+                if(typeof errorMap.firstName !== 'undefined'){
+                    this.trigger("invalid","firstName",errorMap.firstName);
+                    refocus(this.$("input[name='firstName']"));
+                    return;
+                }
+
+                if(typeof errorMap.lastName !== 'undefined'){
+                    this.trigger("invalid","lastName",errorMap.lastName);
+                    refocus(this.$("input[name='lastName']"));
+                    return;
+                }
+
+                if(typeof errorMap.adminEmail !== 'undefined'){
+                    this.trigger("invalid","adminEmail",errorMap.adminEmail);
+                    refocus(this.$("input[name='adminEmail']"));
+                    return;
+                }
+
+                if(typeof errorMap.mail !== 'undefined'){
+                    this.trigger("invalid","mail",errorMap.mail);
+                    refocus(this.$("input[name='mail']"));
+                    return;
+                }
 
                 if(typeof errorMap.email !== 'undefined'){
                     this.trigger("invalid","email",errorMap.email);
@@ -131,17 +155,6 @@ define(["jquery","models/account","views/form","validation"],
                     return;
                 }
 
-                if(typeof errorMap.firstName !== 'undefined'){
-                    this.trigger("invalid","firstName",errorMap.firstName);
-                    refocus(this.$("input[name='firstName']"));
-                    return;
-                }
-
-                if(typeof errorMap.lastName !== 'undefined'){
-                    this.trigger("invalid","lastName",errorMap.lastName);
-                    refocus(this.$("input[name='lastName']"));
-                    return;
-                }                
 
             },
 

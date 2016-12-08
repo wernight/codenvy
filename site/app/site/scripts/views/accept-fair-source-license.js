@@ -38,15 +38,27 @@ define(["jquery","underscore", "views/accountformbase","models/account"],
                     adminEmail: {
                     	required: true,
                     	email: true,
-                    	checkEmail: true,
                         maxlength: 254
                     }
                 };
             },
 
             __submit : function(){
+                var self = this;
                 this.trigger("submitting");
                 this.__showProgress();
+                Account.acceptLicense(
+                    $(this.el).find("input[name='firstName']").val(),
+                    $(this.el).find("input[name='lastName']").val(),
+                    $(this.el).find("input[name='adminEmail']").val()
+                )
+                .then(function(success){
+                    Account.navigateToLocation();
+                })
+                .fail(function(error){
+                    self.__restoreForm();
+                })
+                ;
 
             }
         });
