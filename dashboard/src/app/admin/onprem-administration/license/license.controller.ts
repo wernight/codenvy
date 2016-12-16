@@ -22,7 +22,7 @@ import {CodenvyLicense} from '../../../../components/api/codenvy-license.factory
  * @description This class is handling the controller for 'license' section.
  * @author Oleksii Orel
  */
-export class OnPremisesAdminLicenseCtrl {
+export class OnPremisesAdminLicenseController {
   licenseMessagesService: LicenseMessagesService;
   codenvyLicense: CodenvyLicense;
   isLoading: boolean;

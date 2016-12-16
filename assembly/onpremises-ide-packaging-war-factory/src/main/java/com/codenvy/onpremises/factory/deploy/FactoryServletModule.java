@@ -24,7 +24,7 @@ import javax.inject.Singleton;
 
 
 import static com.codenvy.api.license.SystemLicenseFilter.ACCEPT_FAIR_SOURCE_LICENSE_PAGE_URL;
-import static com.codenvy.api.license.SystemLicenseFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL
+import static com.codenvy.api.license.SystemLicenseFilter.FAIR_SOURCE_LICENSE_IS_NOT_ACCEPTED_ERROR_PAGE_URL;
 import static com.codenvy.api.license.SystemLicenseFilter.NO_USER_INTERACTION;
 
 /**

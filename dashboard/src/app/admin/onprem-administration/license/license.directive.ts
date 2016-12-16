@@ -32,7 +32,7 @@ export class License {
     this.restrict = 'E';
     this.replace = false;
     this.templateUrl = 'app/admin/onprem-administration/license/license.html';
-    this.controller = 'OnPremisesAdminLicenseCtrl';
-    this.controllerAs = 'onPremisesAdminLicenseCtrl';
+    this.controller = 'OnPremisesAdminLicenseController';
+    this.controllerAs = 'onPremisesAdminLicenseController';
   }
 }

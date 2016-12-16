@@ -331,8 +331,8 @@ export class AdminsUserManagementCtrl {
       targetEvent: event,
       bindToController: true,
       clickOutsideToClose: true,
-      controller: 'AdminsAddUserCtrl',
-      controllerAs: 'adminsAddUserCtrl',
+      controller: 'AdminsAddUserController',
+      controllerAs: 'adminsAddUserController',
       locals: {callbackController: this},
       templateUrl: 'app/admin/user-management/add-user/add-user.html'
     });

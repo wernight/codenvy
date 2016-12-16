@@ -22,7 +22,7 @@ import {AdminsUserManagementCtrl} from '../user-management.controller';
  * This class is handling the controller for the add user
  * @author Oleksii Orel
  */
-export class AdminsAddUserCtrl {
+export class AdminsAddUserController {
   $mdDialog: ng.material.IDialogService;
   cheNotification: any;
   codenvyUser: CodenvyUser;
