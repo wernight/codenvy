@@ -4,12 +4,13 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-#
-# Contributors:
-#   Florent Benoit - Initial Implementation
 
-IMAGE_NAME="codenvy/cli"
-. $(cd "$(dirname "$0")"; pwd)/../build.include
+IMAGE_NAME="codenvy/agents"
+DIR=$(cd "$(dirname "$0")"; pwd)
+. ${DIR}/../build.include
 
+mvn clean install -f ${DIR}/pom.xml
+
+# build
 init "$@"
 build "$@"
