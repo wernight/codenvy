@@ -237,6 +237,16 @@
             return deferredResult;
         };
 
+        var logout = function() {
+            if (isWebsocketEnabled()) {
+                var loginUrl = "/api/auth/logout";
+                return $.ajax({
+                    url: loginUrl,
+                    type: "POST"
+                });
+            }
+        };
+
         var login = function(email, password) {
             if (isWebsocketEnabled()) {
                 var loginUrl = "/api/auth/login?" + window.location.search.substring(1);
@@ -338,6 +348,7 @@
             loginWithOauthProvider: loginWithOauthProvider,
             getUserSettings: getUserSettings,
             acceptLicense: acceptLicense,
+            logout: logout,
             isValidDomain: function(domain) {
                 return (/^[a-z0-9][a-z0-9_.-]{2,19}$/).exec(domain) !== null;
             },
