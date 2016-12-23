@@ -16,7 +16,6 @@ package com.codenvy.api.license.server.dao;
 
 import com.codenvy.api.license.server.model.impl.SystemLicenseActionImpl;
 import com.codenvy.api.license.shared.model.Constants;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -31,16 +30,16 @@ public interface SystemLicenseActionDao {
     /**
      * Inserts license action record.
      *
-     * @param codenvyLicenseAction
+     * @param systemLicenseAction
      *      any license action
      * @throws ConflictException
      *      if action already exists in the system
      * @throws ServerException
      *      any other error occurred
      */
-    void insert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
+    void insert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
-    void upsert(SystemLicenseActionImpl codenvyLicenseAction) throws ServerException, ConflictException;
+    void upsert(SystemLicenseActionImpl systemLicenseAction) throws ServerException, ConflictException;
 
     /**
      * Removes system license action record.
@@ -52,10 +51,10 @@ public interface SystemLicenseActionDao {
      * @throws ServerException
      *      any other error occurred
      */
-    void remove(Constants.License licenseType, Constants.Action actionType) throws ServerException;
+    void remove(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException;
 
     /**
-     * Finds license action.
+     * Finds license action for certain license type.
      *
      * @param licenseType
      *          the type of the license
@@ -67,7 +66,23 @@ public interface SystemLicenseActionDao {
      * @throws ServerException
      *      any other error occurred
      */
-    SystemLicenseActionImpl getByLicenseAndAction(Constants.License licenseType, Constants.Action actionType) throws ServerException,
-                                                                                                                     NotFoundException;
+    SystemLicenseActionImpl getByLicenseTypeAndAction(Constants.PaidLicense licenseType, Constants.Action actionType) throws ServerException,
+                                                                                                                             NotFoundException;
+
+    /**
+     * Finds license action for certain license id.
+     *
+     * @param licenseId
+     *          the id of the license
+     * @param actionType
+     *          the action happened with license
+     * @return {@link SystemLicenseActionImpl}
+     * @throws NotFoundException
+     *      no license action found
+     * @throws ServerException
+     *      any other error occurred
+     */
+     SystemLicenseActionImpl getByLicenseIdAndAction(String licenseId, Constants.Action actionType) throws ServerException,
+                                                                                                           NotFoundException;
 
 }

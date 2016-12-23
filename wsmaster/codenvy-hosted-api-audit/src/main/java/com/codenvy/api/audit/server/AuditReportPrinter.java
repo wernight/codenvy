@@ -15,10 +15,8 @@
 package com.codenvy.api.audit.server;
 
 import com.codenvy.api.license.SystemLicense;
-import com.codenvy.api.license.server.model.impl.FairSourceLicenseAcceptanceImpl;
 import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -74,7 +72,7 @@ class AuditReportPrinter {
         if (license != null) {
             printRow("Number of users licensed: " + license.getNumberOfUsers() + "\n", auditReport);
             printRow("Date when license expires: " +
-                     new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH).format(license.getExpirationDate()) + "\n", auditReport);
+                     new SimpleDateFormat("dd MMMM yyyy", Locale.ENGLISH).format(license.getExpirationDateFeatureValue()) + "\n", auditReport);
         } else {
             printError("Failed to retrieve license", auditReport);
         }
@@ -164,12 +162,9 @@ class AuditReportPrinter {
      */
     protected void printFairSourceLicenseAcceptanceInfo(SystemLicenseAction systemLicenseAction,
                                                         Path auditReport) throws ServerException {
-        FairSourceLicenseAcceptanceImpl sourceLicenseAcceptance =
-                new FairSourceLicenseAcceptanceImpl(systemLicenseAction.getAttributes());
         String acceptanceTime = timestampToString(systemLicenseAction);
 
-        printRow(format("%s accepted Fair Source license agreement at %s",
-                        sourceLicenseAcceptance.getEmail(), acceptanceTime), auditReport);
+        printRow(format("%s Fair Source license was accepted.", acceptanceTime), auditReport);
         printRow("\n", auditReport);
     }
 
@@ -181,8 +176,8 @@ class AuditReportPrinter {
         String email = systemLicenseAction.getAttributes().get("email");
         String acceptanceTime = timestampToString(systemLicenseAction);
 
-        printRow(format("%s accepted Codenvy license agreement %s at %s",
-                        email, systemLicenseAction.getLicenseQualifier(), acceptanceTime), auditReport);
+        printRow(format("%s added Codenvy license %s at %s",
+                        email, systemLicenseAction.getLicenseId(), acceptanceTime), auditReport);
         printRow("\n", auditReport);
     }
 
@@ -194,7 +189,7 @@ class AuditReportPrinter {
         String acceptanceTime = timestampToString(systemLicenseAction);
 
         printRow(format("Paid license %s expired on %s. System returned to previously accepted Fair Source license.",
-                        systemLicenseAction.getLicenseQualifier(), acceptanceTime), auditReport);
+                        systemLicenseAction.getLicenseId(), acceptanceTime), auditReport);
         printRow("\n", auditReport);
     }
 

@@ -26,6 +26,7 @@ import com.codenvy.api.license.exception.SystemLicenseNotFoundException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -73,8 +74,6 @@ public class SystemLicenseServiceTest {
     private SystemLicense                        mockSystemLicense;
     @Mock
     private SystemLicenseFactory                 mockLicenseFactory;
-    @Mock
-    private FairSourceLicenseAcceptanceValidator licenseAcceptanceValidator;
 
     @InjectMocks
     SystemLicenseService systemLicenseService;
@@ -175,7 +174,7 @@ public class SystemLicenseServiceTest {
         doReturn(ImmutableMap.of(SystemLicenseFeature.TYPE, "type",
                                  SystemLicenseFeature.EXPIRATION, "2015/10/10",
                                  SystemLicenseFeature.USERS, "15")).when(mockSystemLicense).getFeatures();
-        doReturn(Boolean.FALSE).when(mockSystemLicense).isExpired();
+        doReturn(Boolean.FALSE).when(mockSystemLicense).isExpiredCompletely();
 
         Response response = given()
                 .auth().basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD).when()
@@ -216,7 +215,7 @@ public class SystemLicenseServiceTest {
     }
 
     @Test
-    public void testisSystemUsageLegal() throws IOException, ServerException {
+    public void testisSystemUsageLegal() throws IOException, ServerException, ConflictException {
         doReturn(true).when(licenseManager).isSystemUsageLegal();
         doReturn(ImmutableList.of()).when(licenseManager).getLicenseIssues();
 
@@ -228,7 +227,7 @@ public class SystemLicenseServiceTest {
     }
 
     @Test
-    public void testIsCodenvyUsageNotLegal() throws IOException, ServerException {
+    public void testIsCodenvyUsageNotLegal() throws IOException, ServerException, ConflictException {
         doReturn(false).when(licenseManager).isSystemUsageLegal();
         doReturn(ImmutableList.of(issue)).when(licenseManager).getLicenseIssues();
 
