@@ -15,7 +15,6 @@
 package com.codenvy.api.deploy;
 
 import com.codenvy.api.license.SystemLicenseLoginFilter;
-import com.codenvy.api.license.SystemLicenseWorkspaceFilter;
 import com.google.inject.servlet.ServletModule;
 import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.inject.DynaModule;
@@ -104,6 +103,7 @@ public class OnPremisesIdeApiServletModule extends ServletModule {
                                                                  "/organization",
                                                                  "/organization/*",
                                                                  "/system/ram/*",
+                                                                 "/license/account/*",
                                                                  "/resource/*");
 
     @Override

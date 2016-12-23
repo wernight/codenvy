@@ -40,6 +40,8 @@ import com.codenvy.auth.sso.server.organization.UserCreationValidator;
 import com.codenvy.auth.sso.server.organization.UserCreator;
 import com.codenvy.ldap.LdapModule;
 import com.codenvy.ldap.auth.LdapAuthenticationHandler;
+import com.codenvy.machine.backup.DockerEnvironmentBackupManager;
+import com.codenvy.machine.backup.EnvironmentBackupManager;
 import com.codenvy.organization.api.OrganizationApiModule;
 import com.codenvy.organization.api.OrganizationJpaModule;
 import com.codenvy.plugin.github.factory.resolver.GithubFactoryParametersResolver;
@@ -338,8 +340,11 @@ public class OnPremisesIdeApiModule extends AbstractModule {
         allMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
 
 
-        bind(String.class).annotatedWith(Names.named("machine.docker.machine_env"))
-                          .toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
+        Multibinder<String> allMachinesEnvVars = Multibinder.newSetBinder(binder(),
+                                                                          String.class,
+                                                                          Names.named("machine.docker.machine_env"))
+                                                            .permitDuplicates();
+        allMachinesEnvVars.addBinding().toProvider(com.codenvy.machine.MaintenanceConstraintProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
 
@@ -361,6 +366,13 @@ public class OnPremisesIdeApiModule extends AbstractModule {
                         .implement(org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo.class,
                                    com.codenvy.machine.HostedServersInstanceRuntimeInfo.class)
                         .build(org.eclipse.che.plugin.docker.machine.DockerMachineFactory.class));
+
+        MapBinder<String, EnvironmentBackupManager> backupManagers = MapBinder.newMapBinder(binder(),
+                                                                                            String.class,
+                                                                                            EnvironmentBackupManager.class);
+        backupManagers.addBinding("compose").to(DockerEnvironmentBackupManager.class);
+        backupManagers.addBinding("dockerfile").to(DockerEnvironmentBackupManager.class);
+        backupManagers.addBinding("dockerimage").to(DockerEnvironmentBackupManager.class);
 
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(com.codenvy.machine.RemoteWorkspaceFolderPathProvider.class);
