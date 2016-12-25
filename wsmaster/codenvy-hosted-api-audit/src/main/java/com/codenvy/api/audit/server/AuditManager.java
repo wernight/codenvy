@@ -21,7 +21,6 @@ import com.codenvy.api.license.server.SystemLicenseManager;
 import com.codenvy.api.license.shared.model.SystemLicenseAction;
 import com.codenvy.api.permission.server.PermissionsManager;
 import com.codenvy.api.permission.server.model.impl.AbstractPermissions;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -46,10 +45,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
@@ -118,9 +119,7 @@ public class AuditManager {
                 //Continue printing report without license info
             }
 
-            processFairSourceLicenseAcceptanceInfo(auditReport);
-            processProductLicenseAcceptanceInfo(auditReport);
-            processProductLicenseExpirationInfo(auditReport);
+            processLicenseActions(auditReport);
 
             reportPrinter.printHeader(auditReport, userManager.getTotalCount(), license);
             printAllUsers(auditReport);
@@ -137,36 +136,54 @@ public class AuditManager {
         return auditReport;
     }
 
-    private void processProductLicenseExpirationInfo(Path auditReport) throws ServerException {
+    /**
+     * Print license actions info in chronological order.
+     * @param auditReport
+     * @throws ServerException
+     */
+    private void processLicenseActions(Path auditReport) throws ServerException {
+        Map<Long, Runnable> actions = new TreeMap<>();
         try {
-            SystemLicenseAction systemLicenseAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED);
-            reportPrinter.printProductLicenseExpirationInfo(systemLicenseAction, auditReport);
+            SystemLicenseAction systemProductLicenseExpiredAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, EXPIRED);
+            actions.put(systemProductLicenseExpiredAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printProductLicenseExpirationInfo(systemProductLicenseExpiredAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (NotFoundException ignored) {
-        } catch (ServerException e) {
-            LOG.error(e.getMessage(), e);
-            reportPrinter.printError("Failed to retrieve product license info.", auditReport);
         }
-    }
 
-    private void processProductLicenseAcceptanceInfo(Path auditReport) throws ServerException {
         try {
-            SystemLicenseAction systemLicenseAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED);
-            reportPrinter.printProductLicenseAcceptanceInfo(systemLicenseAction, auditReport);
+            SystemLicenseAction systemProductLicenseAddedAction = systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED);
+            actions.put(systemProductLicenseAddedAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printProductLicenseAdditionInfo(systemProductLicenseAddedAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (NotFoundException ignored) {
-        } catch (ServerException e) {
-            LOG.error(e.getMessage(), e);
-            reportPrinter.printError("Failed to retrieve product license info.", auditReport);
         }
-    }
 
-    private void processFairSourceLicenseAcceptanceInfo(Path auditReport) throws ServerException {
         try {
-            SystemLicenseAction systemLicenseAction = systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED);
-            reportPrinter.printFairSourceLicenseAcceptanceInfo(systemLicenseAction, auditReport);
+            SystemLicenseAction systemFairSourceLicenseAcceptedAction = systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED);
+            actions.put(systemFairSourceLicenseAcceptedAction.getActionTimestamp(), () -> {
+                try {
+                    reportPrinter.printFairSourceLicenseAcceptanceInfo(systemFairSourceLicenseAcceptedAction, auditReport);
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (NotFoundException ignored) {
-        } catch (ServerException e) {
+        }
+
+        try {
+            actions.values().stream().forEach(Runnable::run);
+        } catch (RuntimeException e) {
             LOG.error(e.getMessage(), e);
-            reportPrinter.printError("Failed to retrieve fair source license info.", auditReport);
+            reportPrinter.printError("Failed to retrieve license info.", auditReport);
         }
     }
 

@@ -32,6 +32,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import java.util.Collections;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
@@ -74,14 +75,19 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
 
     @Override
     public void onProductLicenseDeleted(SystemLicense systemLicense) throws ApiException {
-        SystemLicenseActionImpl codenvyLicenseAction
+        // don't update existed record about expiration of the same license
+        try {
+            systemLicenseActionDao.getByLicenseIdAndAction(systemLicense.getLicenseId(), EXPIRED);
+        } catch (NotFoundException e) {
+            SystemLicenseActionImpl codenvyLicenseAction
                 = new SystemLicenseActionImpl(PRODUCT_LICENSE,
                                               EXPIRED,
                                               System.currentTimeMillis(),
                                               systemLicense.getLicenseId(),
                                               Collections.emptyMap());
 
-        systemLicenseActionDao.upsert(codenvyLicenseAction);
+            systemLicenseActionDao.upsert(codenvyLicenseAction);
+        }
     }
 
     @Override
@@ -90,19 +96,9 @@ public class SystemLicenseActionHandler implements SystemLicenseManagerObserver 
         String userId = current.getSubject().getUserId();
         User user = userManager.getById(userId);
 
-        try {
-            SystemLicenseActionImpl prevCodenvyLicenseAction = systemLicenseActionDao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED);
-            systemLicenseActionDao.remove(PRODUCT_LICENSE, EXPIRED);
-
-            if (prevCodenvyLicenseAction.getLicenseId().equalsIgnoreCase(systemLicense.getLicenseId())) {
-                return;
-            }
-        } catch (NotFoundException ignored) {
-        }
-
         SystemLicenseActionImpl codenvyLicenseAction
                 = new SystemLicenseActionImpl(PRODUCT_LICENSE,
-                                              ACCEPTED,
+                                              ADDED,
                                               System.currentTimeMillis(),
                                               systemLicense.getLicenseId(),
                                               Collections.singletonMap("email", user.getEmail()));

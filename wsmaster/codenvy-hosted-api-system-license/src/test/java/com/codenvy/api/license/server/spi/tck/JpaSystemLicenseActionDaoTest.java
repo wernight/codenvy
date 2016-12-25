@@ -30,6 +30,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
@@ -57,14 +58,14 @@ public class JpaSystemLicenseActionDaoTest {
     @BeforeMethod
     public void setUp() throws Exception {
         systemLicenseActions = new SystemLicenseActionImpl[] {new SystemLicenseActionImpl(FAIR_SOURCE_LICENSE,
-                                                                                           ACCEPTED,
+                                                                                          ACCEPTED,
                                                                                            System.currentTimeMillis(),
                                                                                            null,
                                                                                            ImmutableMap.of("prop1", "value1",
                                                                                                            "prop2", "value2",
                                                                                                            "prop3", "value2")),
                                                                new SystemLicenseActionImpl(PRODUCT_LICENSE,
-                                                                                           ACCEPTED,
+                                                                                           ADDED,
                                                                                            System.currentTimeMillis(),
                                                                                            LICENSE_ID,
                                                                                            ImmutableMap.of("prop4", "value4")),
@@ -122,7 +123,7 @@ public class JpaSystemLicenseActionDaoTest {
 
     @Test
     public void shouldFindRecordByLicenseIdAndAction() throws Exception {
-        SystemLicenseActionImpl systemLicenseAction = dao.getByLicenseIdAndAction(LICENSE_ID, ACCEPTED);
+        SystemLicenseActionImpl systemLicenseAction = dao.getByLicenseIdAndAction(LICENSE_ID, ADDED);
 
         assertNotNull(systemLicenseAction);
         assertEquals(systemLicenseAction.getAttributes().size(), 1);
@@ -137,17 +138,17 @@ public class JpaSystemLicenseActionDaoTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldRemoveRecord() throws Exception {
-        assertNotNull(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED));
+        assertNotNull(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ADDED));
 
-        dao.remove(PRODUCT_LICENSE, ACCEPTED);
+        dao.remove(PRODUCT_LICENSE, ADDED);
 
-        dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED);
+        dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ADDED);
     }
 
     @Test
     public void shouldNotThrowExceptionOnRemoveIfRecordAbsent() throws Exception {
-        dao.remove(PRODUCT_LICENSE, ACCEPTED);
-        dao.remove(PRODUCT_LICENSE, ACCEPTED);
+        dao.remove(PRODUCT_LICENSE, ADDED);
+        dao.remove(PRODUCT_LICENSE, ADDED);
     }
 
     @Test

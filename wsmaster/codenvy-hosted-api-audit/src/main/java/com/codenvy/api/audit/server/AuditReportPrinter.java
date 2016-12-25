@@ -170,9 +170,9 @@ class AuditReportPrinter {
 
     /**
      * @param systemLicenseAction
-     *      acceptance action
+     *      addition action
      */
-    protected void printProductLicenseAcceptanceInfo(SystemLicenseAction systemLicenseAction, Path auditReport) throws ServerException {
+    protected void printProductLicenseAdditionInfo(SystemLicenseAction systemLicenseAction, Path auditReport) throws ServerException {
         String email = systemLicenseAction.getAttributes().get("email");
         String acceptanceTime = timestampToString(systemLicenseAction);
 

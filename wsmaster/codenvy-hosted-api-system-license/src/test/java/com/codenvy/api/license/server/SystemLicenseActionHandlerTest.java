@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
@@ -107,8 +108,13 @@ public class SystemLicenseActionHandlerTest {
 
     @Test
     public void shouldAddProductLicenseExpiredRecord() throws Exception {
+        // given
+        doThrow(NotFoundException.class).when(dao).getByLicenseIdAndAction(LICENSE_ID, EXPIRED);
+
+        // when
         systemLicenseActionHandler.onProductLicenseDeleted(systemLicense);
 
+        // then
         ArgumentCaptor<SystemLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(SystemLicenseActionImpl.class);
         verify(dao).upsert(actionCaptor.capture());
         SystemLicenseActionImpl expireAction = actionCaptor.getValue();
@@ -118,8 +124,17 @@ public class SystemLicenseActionHandlerTest {
     }
 
     @Test
+    public void shouldNotUpsertProductLicenseExpiredRecordForExistedRecord() throws Exception {
+        // when
+        systemLicenseActionHandler.onProductLicenseDeleted(systemLicense);
+
+        // then
+        verify(dao, never()).upsert(any());
+    }
+
+    @Test
     public void ifProductLicenseStoredShouldAddRecord() throws Exception {
-        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED)).thenThrow(new NotFoundException("Not found"));
+        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ADDED)).thenThrow(new NotFoundException("Not found"));
 
         systemLicenseActionHandler.onProductLicenseStored(systemLicense);
 
@@ -127,37 +142,34 @@ public class SystemLicenseActionHandlerTest {
         verify(dao).upsert(actionCaptor.capture());
         SystemLicenseActionImpl acceptAction = actionCaptor.getValue();
         assertEquals(acceptAction.getLicenseType(), PRODUCT_LICENSE);
-        assertEquals(acceptAction.getActionType(), ACCEPTED);
+        assertEquals(acceptAction.getActionType(), ADDED);
         assertEquals(acceptAction.getLicenseId(), LICENSE_ID);
         assertEquals(acceptAction.getAttributes().get("email"), "test@user");
     }
 
     @Test
-    public void ifSameProductLicenseStoredShouldNotAddAcceptedRecordShouldDeletedExpirationRecord() throws Exception {
+    public void ifSameProductLicenseStoredShouldUpsertAddedLicenseRecord() throws Exception {
         when(codenvyLicenseAction.getLicenseId()).thenReturn(LICENSE_ID);
-        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(codenvyLicenseAction);
+        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ADDED)).thenReturn(codenvyLicenseAction);
 
         systemLicenseActionHandler.onProductLicenseStored(systemLicense);
 
-        verify(dao, never()).upsert(any(SystemLicenseActionImpl.class));
+        verify(dao).upsert(any(SystemLicenseActionImpl.class));
         verify(dao, never()).insert(any(SystemLicenseActionImpl.class));
-        verify(dao).remove(PRODUCT_LICENSE, EXPIRED);
     }
 
     @Test
     public void ifNewProductLicenseStoredShouldRemoveOldAndAddNewRecord() throws Exception {
-        when(codenvyLicenseAction.getLicenseId()).thenReturn("old qualifier");
-        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(codenvyLicenseAction);
+        when(codenvyLicenseAction.getLicenseId()).thenReturn("old id");
+        when(dao.getByLicenseTypeAndAction(PRODUCT_LICENSE, ADDED)).thenReturn(codenvyLicenseAction);
 
         systemLicenseActionHandler.onProductLicenseStored(systemLicense);
-
-        verify(dao).remove(PRODUCT_LICENSE, EXPIRED);
 
         ArgumentCaptor<SystemLicenseActionImpl> actionCaptor = ArgumentCaptor.forClass(SystemLicenseActionImpl.class);
         verify(dao).upsert(actionCaptor.capture());
         SystemLicenseActionImpl expireAction = actionCaptor.getValue();
         assertEquals(expireAction.getLicenseType(), PRODUCT_LICENSE);
-        assertEquals(expireAction.getActionType(), ACCEPTED);
+        assertEquals(expireAction.getActionType(), ADDED);
         assertEquals(expireAction.getLicenseId(), LICENSE_ID);
     }
 }

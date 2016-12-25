@@ -111,7 +111,7 @@ public class SystemLicenseLoginFilterTest {
         //given
         when(servletRequest.getRequestURI()).thenReturn("/api/user");
 
-        setHasFairSourceLicenseAccepted(isFairSourceLicenseAccepted);
+        setIsFairSourceLicenseAccepted(isFairSourceLicenseAccepted);
         setIsAdminAndNotInteractive(isAdmin, isNoInteraction);
 
         //when
@@ -199,7 +199,7 @@ public class SystemLicenseLoginFilterTest {
         };
     }
 
-    public void setHasFairSourceLicenseAccepted(boolean hasFairSourceLicenseAccepted) throws Exception {
+    public void setIsFairSourceLicenseAccepted(boolean hasFairSourceLicenseAccepted) throws Exception {
         List<IssueDto> issues;
         if (hasFairSourceLicenseAccepted) {
             issues = ImmutableList.of();

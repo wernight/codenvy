@@ -43,6 +43,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import static com.codenvy.api.license.shared.model.Constants.Action.ACCEPTED;
+import static com.codenvy.api.license.shared.model.Constants.Action.ADDED;
 import static com.codenvy.api.license.shared.model.Constants.Action.EXPIRED;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.FAIR_SOURCE_LICENSE;
 import static com.codenvy.api.license.shared.model.Constants.PaidLicense.PRODUCT_LICENSE;
@@ -146,12 +147,12 @@ public class AuditManagerTest {
                 .thenReturn(new GregorianCalendar(2016, MARCH, 3, 22, 15).getTimeInMillis());
         when(systemLicenseActionHandler.findAction(FAIR_SOURCE_LICENSE, ACCEPTED)).thenReturn(acceptFairSourceLicenseAction);
 
-        SystemLicenseAction acceptProductLicenseAction = mock(SystemLicenseAction.class);
-        when(acceptProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
-        when(acceptProductLicenseAction.getLicenseId()).thenReturn("1234");
-        when(acceptProductLicenseAction.getActionTimestamp())
+        SystemLicenseAction addProductLicenseAction = mock(SystemLicenseAction.class);
+        when(addProductLicenseAction.getAttributes()).thenReturn(Collections.singletonMap("email", "admin@codenvy.com"));
+        when(addProductLicenseAction.getLicenseId()).thenReturn("1234");
+        when(addProductLicenseAction.getActionTimestamp())
                 .thenReturn(new GregorianCalendar(2016, MARCH, 4, 22, 15).getTimeInMillis());
-        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ACCEPTED)).thenReturn(acceptProductLicenseAction);
+        when(systemLicenseActionHandler.findAction(PRODUCT_LICENSE, ADDED)).thenReturn(addProductLicenseAction);
 
         SystemLicenseAction expireProductLicenseAction = mock(SystemLicenseAction.class);
         when(expireProductLicenseAction.getLicenseId()).thenReturn("1234");
