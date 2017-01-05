@@ -17,8 +17,10 @@ package com.codenvy.ext.java.server;
 import com.codenvy.api.permission.server.PermissionChecker;
 import com.codenvy.auth.sso.client.TokenHandler;
 import com.codenvy.auth.sso.client.token.RequestTokenExtractor;
+import com.google.gson.JsonParser;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 
@@ -26,6 +28,10 @@ import org.eclipse.che.EventBusURLProvider;
 import org.eclipse.che.UserTokenProvider;
 import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.api.core.jsonrpc.BuildingRequestTransmitter;
+import org.eclipse.che.api.core.jsonrpc.JsonRpcFactory;
+import org.eclipse.che.api.core.jsonrpc.JsonRpcMessageReceiver;
+import org.eclipse.che.api.core.jsonrpc.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -42,6 +48,7 @@ import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.ide.ext.microsoft.server.inject.MicrosoftModule;
@@ -56,6 +63,7 @@ import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * @author Evgen Vidolob
@@ -145,13 +153,24 @@ public class MachineModule extends AbstractModule {
         requestStaticInjection(GuiceInjectorEndpointConfigurator.class);
 
         bind(WebSocketMessageTransmitter.class).to(BasicWebSocketMessageTransmitter.class);
-        bind(WebSocketMessageReceiver.class).to(org.eclipse.che.api.core.jsonrpc.impl.WebSocketToJsonRpcDispatcher.class);
+        bind(WebSocketMessageReceiver.class).to(JsonRpcMessageReceiver.class);
     }
 
     private void configureJsonRpc() {
-        bind(org.eclipse.che.api.core.jsonrpc.RequestTransmitter.class)
-                .to(org.eclipse.che.api.core.jsonrpc.impl.WebSocketTransmitter.class);
+        install(new FactoryModuleBuilder().build(JsonRpcFactory.class));
+        install(new FactoryModuleBuilder().build(RequestHandlerConfigurator.class));
+        install(new FactoryModuleBuilder().build(BuildingRequestTransmitter.class));
+    }
 
-        MapBinder.newMapBinder(binder(), String.class, org.eclipse.che.api.core.jsonrpc.RequestHandler.class);
+    @Provides
+    @Singleton
+    public DtoFactory dtoFactory() {
+        return DtoFactory.getInstance();
+    }
+
+    @Provides
+    @Singleton
+    public JsonParser jsonParser(){
+        return new JsonParser();
     }
 }
