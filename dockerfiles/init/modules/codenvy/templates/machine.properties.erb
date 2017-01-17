@@ -64,8 +64,8 @@ che.docker.always_pull_image=true
 che.docker.api=1.20
 
 # https support
-machine.proxy_wsagent_server_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/%3$s_%2$s/%4$s
-machine.proxy_terminal_server_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://<%= scope.lookupvar('codenvy::host_url') %>/%3$s_%2$s/%4$s
+machine.proxy_wsagent_server_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://%5$s/%3$s_%2$s/%4$s
+machine.proxy_terminal_server_url_template=<%= scope.lookupvar('codenvy::host_protocol') %>://%5$s/%3$s_%2$s/%4$s
 
 
 # If true, then all docker machines will start in privilege mode.
