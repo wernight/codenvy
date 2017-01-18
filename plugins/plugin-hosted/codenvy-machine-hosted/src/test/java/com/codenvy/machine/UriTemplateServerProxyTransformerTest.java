@@ -134,10 +134,10 @@ public class UriTemplateServerProxyTransformerTest {
         ServerImpl expectedServer = new ServerImpl("myRef",
                                                    "https",
                                                    "localhost",
-                                                   "https://localhost/32589_public-host.com/some/path",
-                                                   new ServerPropertiesImpl("/32589_public-host.com/some/path",
+                                                   "https://localhost/32589_my-server.com/some/path",
+                                                   new ServerPropertiesImpl("/32589_my-server.com/some/path",
                                                                             "public-host.com",
-                                                                            "https://public-host.com/32589_public-host.com/some/path"));
+                                                                            "https://public-host.com/32589_my-server.com/some/path"));
 
         ServerImpl modifiedServer = serverModifier.transform(originServer);
 

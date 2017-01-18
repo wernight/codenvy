@@ -46,6 +46,7 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
      * <li>Server location hostname</li>
      * <li>Server location external port</li>
      * <li>Server path (without leading slash if present)</li>
+     * <li>codenvy.host property (or "che.docker.ip.external" if set)</li>
      * </ul>
      * Template should satisfy that invocation. Not all arguments have to be used.<br>
      * Modified server components will be retrieved from URI created by this operation.<br>
@@ -70,46 +71,44 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
         if (serverPath.startsWith("/")) {
             serverPath = serverPath.substring(1);
         }
+
+        // In case of external address property set, we should replace codenvy.host by this external address.
+        // for example on macOS, codenvy.host is defaulted to 192.168.65.2 which is not reachable from host machine while
+        // it needs to use localhost (external address).
         final String externalAddress;
-        final String externalServerHost;
-        final String internalServerHost;
-        if (!Strings.isNullOrEmpty(externalAddressProperty) && !Strings.isNullOrEmpty(codenvyHost)) {
+        if (!Strings.isNullOrEmpty(externalAddressProperty)) {
             externalAddress = externalAddressProperty;
-            externalServerHost = codenvyHost;
-            internalServerHost = codenvyHost;
-        } else if (!Strings.isNullOrEmpty(codenvyHost)) {
-            externalAddress = codenvyHost;
-            externalServerHost = serverHost;
-            internalServerHost = codenvyHost;
         } else {
-            externalAddress = serverHost;
-            externalServerHost = serverHost;
-            internalServerHost = serverHost;
+            externalAddress = codenvyHost;
         }
+
         try {
+            // external URI/address will be used by the browser clients (redirect calls through externalAddress or codenvyHost if not set)
             URI serverUriExternal = new URI(format(serverUrlTemplate,
                                                    server.getRef(),
-                                                   externalServerHost,
+                                                   serverHost,
                                                    serverPort,
                                                    serverPath,
                                                    externalAddress));
-            URI serverUri = new URI(format(serverUrlTemplate,
-                                           server.getRef(),
-                                           internalServerHost,
-                                           serverPort,
-                                           serverPath,
-                                           internalServerHost));
+            String updatedExternalServerAddress = serverUriExternal.getHost() +
+                                                  (serverUriExternal.getPort() == -1 ? "" : ":" + serverUriExternal.getPort());
 
-            String newExternalServerAddress = serverUriExternal.getHost() +
-                                      (serverUriExternal.getPort() == -1 ? "" : ":" + serverUriExternal.getPort());
-            String newServerAddress = serverUri.getHost() +
-                                      (serverUri.getPort() == -1 ? "" : ":" + serverUri.getPort());
+            // internal URI/address will be used by workspace agents internals (we redirect calls to codenvyHost)
+            URI serverUriInternal = new URI(format(serverUrlTemplate,
+                                                   server.getRef(),
+                                                   serverHost,
+                                                   serverPort,
+                                                   serverPath,
+                                                   codenvyHost));
+            String updatedInternalServerAddress = serverUriInternal.getHost() +
+                                                  (serverUriInternal.getPort() == -1 ? "" : ":" + serverUriInternal.getPort());
 
+            // return a new updated server object with correct external and internal addresses.
             return new ServerImpl(server.getRef(),
                                   serverUriExternal.getScheme(),
-                                  newExternalServerAddress,
+                                  updatedExternalServerAddress,
                                   serverUriExternal.toString(),
-                                  new ServerPropertiesImpl(serverUriExternal.getPath(), newServerAddress, serverUri.toString()));
+                                  new ServerPropertiesImpl(serverUriExternal.getPath(), updatedInternalServerAddress, serverUriInternal.toString()));
         } catch (URISyntaxException e) {
             LOG.error(format("Server uri created from template taken from configuration is invalid. Template:%s. Origin server:%s",
                              serverUrlTemplate,

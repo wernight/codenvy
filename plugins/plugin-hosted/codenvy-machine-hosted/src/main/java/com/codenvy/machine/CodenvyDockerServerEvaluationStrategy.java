@@ -15,10 +15,8 @@
 package com.codenvy.machine;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
@@ -37,14 +35,8 @@ import java.util.Map;
  */
 public class CodenvyDockerServerEvaluationStrategy extends ServerEvaluationStrategy {
 
-    /**
-     * Used to store the address set by property {@code che.docker.ip.external}. if applicable.
-     */
-    protected String externalAddressProperty;
-
     @Inject
-    public CodenvyDockerServerEvaluationStrategy (@Nullable @Named("che.docker.ip.external") String externalAddress) {
-        this.externalAddressProperty = externalAddress;
+    public CodenvyDockerServerEvaluationStrategy () {
     }
 
     @Override
@@ -56,11 +48,7 @@ public class CodenvyDockerServerEvaluationStrategy extends ServerEvaluationStrat
 
     @Override
     protected Map<String, String> getExternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
-        String externalAddress = externalAddressProperty != null ?
-                                 externalAddressProperty :
-                                 internalHost;
-
-        return getInternalAddressesAndPorts(containerInfo, externalAddress);
+        return getInternalAddressesAndPorts(containerInfo, internalHost);
     }
 
     // TODO move into base class

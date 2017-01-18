@@ -66,10 +66,10 @@ COUNT=0
              fi
   done
 
-# CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
+# CHE_DOCKER_IP_EXTERNAL must be set on mac/windows as internal docker ip is not reachable from host
+# example : docker ip = 192.168.65.2 but client on host needs to use localhost
 HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
 if has_external_hostname; then
-  # Internal property used by Che to set hostname.
   export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
 fi
 

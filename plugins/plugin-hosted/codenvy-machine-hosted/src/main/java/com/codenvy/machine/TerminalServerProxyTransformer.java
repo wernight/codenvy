@@ -26,7 +26,7 @@ import javax.inject.Named;
  */
 public class TerminalServerProxyTransformer extends UriTemplateServerProxyTransformer {
     @Inject
-    public TerminalServerProxyTransformer(@Named("machine.proxy_wsagent_server_url_template") String serverUrlTemplate, @Nullable @Named("codenvy.host") String codenvyHost, @Nullable @Named("che.docker.ip.external") String externalAddress) {
+    public TerminalServerProxyTransformer(@Named("machine.proxy_terminal_server_url_template") String serverUrlTemplate, @Named("codenvy.host") String codenvyHost, @Nullable @Named("che.docker.ip.external") String externalAddress) {
         super(serverUrlTemplate, codenvyHost, externalAddress);
     }
 }

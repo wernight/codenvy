@@ -40,14 +40,12 @@ import static org.testng.Assert.assertTrue;
 public class CodenvyDockerServerEvaluationStrategyTest {
     private static final String HOST = "test.host.com";
 
-    private static final String CHE_DOCKER_IP_EXTERNAL   = "my-external-host.org";
-
-
     @Mock
     private ContainerInfo   containerInfo;
     @Mock
     private NetworkSettings networkSettings;
 
+    private CodenvyDockerServerEvaluationStrategy strategy = new CodenvyDockerServerEvaluationStrategy();
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -57,19 +55,16 @@ public class CodenvyDockerServerEvaluationStrategyTest {
 
     @Test
     public void shouldReturnEmptyMapOnRetrievalOfInternalAddressesIfNoPortExposed() throws Exception {
-        CodenvyDockerServerEvaluationStrategy strategy = new CodenvyDockerServerEvaluationStrategy(null);
         assertTrue(strategy.getInternalAddressesAndPorts(containerInfo, HOST).isEmpty());
     }
 
     @Test
     public void shouldReturnEmptyMapOnRetrievalOfExternalAddressesIfNoPortExposed() throws Exception {
-        CodenvyDockerServerEvaluationStrategy strategy = new CodenvyDockerServerEvaluationStrategy(null);
         assertTrue(strategy.getExternalAddressesAndPorts(containerInfo, HOST).isEmpty());
     }
 
     @Test
     public void shouldUseProvidedInternalHostOnRetrievalOfInternalAddresses() throws Exception {
-        CodenvyDockerServerEvaluationStrategy strategy = new CodenvyDockerServerEvaluationStrategy(null);
         Map<String, List<PortBinding>> exposedPorts = new HashMap<>();
         exposedPorts.put("8080/tcp", singletonList(new PortBinding().withHostIp("127.0.0.1").withHostPort("32789")));
         exposedPorts.put("9090/udp", singletonList(new PortBinding().withHostIp("192.168.0.1").withHostPort("20000")));
@@ -86,7 +81,6 @@ public class CodenvyDockerServerEvaluationStrategyTest {
 
     @Test
     public void shouldUseProvidedInternalHostOnRetrievalOfExternalAddresses() throws Exception {
-        CodenvyDockerServerEvaluationStrategy strategy = new CodenvyDockerServerEvaluationStrategy(null);
         Map<String, List<PortBinding>> exposedPorts = new HashMap<>();
         exposedPorts.put("8080/tcp", singletonList(new PortBinding().withHostIp("127.0.0.1").withHostPort("32789")));
         exposedPorts.put("9090/udp", singletonList(new PortBinding().withHostIp("192.168.0.1").withHostPort("20000")));
@@ -98,30 +92,6 @@ public class CodenvyDockerServerEvaluationStrategyTest {
         for (Map.Entry<String, List<PortBinding>> entry : exposedPorts.entrySet()) {
             assertEquals(externalAddressesAndPorts.get(entry.getKey()),
                          HOST + ":" + entry.getValue().get(0).getHostPort());
-        }
-    }
-
-
-    /**
-     * Test: If che.docker.ip.external is not null, that should take precedence for external address.
-     * @throws Exception
-     */
-    @Test
-    public void shouldUseExternalIpPropertyOnRetrievalOfExternalAddresses() throws Exception {
-        // given
-        CodenvyDockerServerEvaluationStrategy strategy = new CodenvyDockerServerEvaluationStrategy(CHE_DOCKER_IP_EXTERNAL);
-
-        Map<String, List<PortBinding>> exposedPorts = new HashMap<>();
-        exposedPorts.put("8080/tcp", singletonList(new PortBinding().withHostIp("127.0.0.1").withHostPort("32789")));
-        exposedPorts.put("9090/udp", singletonList(new PortBinding().withHostIp("192.168.0.1").withHostPort("20000")));
-        when(networkSettings.getPorts()).thenReturn(exposedPorts);
-
-        Map<String, String> externalAddressesAndPorts =
-                strategy.getExternalAddressesAndPorts(containerInfo, HOST);
-
-        for (Map.Entry<String, List<PortBinding>> entry : exposedPorts.entrySet()) {
-            assertEquals(externalAddressesAndPorts.get(entry.getKey()),
-                         CHE_DOCKER_IP_EXTERNAL + ":" + entry.getValue().get(0).getHostPort());
         }
     }
 }
