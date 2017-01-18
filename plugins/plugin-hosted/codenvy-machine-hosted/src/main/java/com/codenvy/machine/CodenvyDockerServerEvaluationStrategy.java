@@ -14,8 +14,6 @@
  */
 package com.codenvy.machine;
 
-import com.google.inject.Inject;
-
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -34,11 +32,6 @@ import java.util.Map;
  * @see ServerEvaluationStrategy
  */
 public class CodenvyDockerServerEvaluationStrategy extends ServerEvaluationStrategy {
-
-    @Inject
-    public CodenvyDockerServerEvaluationStrategy () {
-    }
-
     @Override
     protected Map<String, String> getInternalAddressesAndPorts(ContainerInfo containerInfo, String internalHost) {
         Map<String, List<PortBinding>> portBindings = containerInfo.getNetworkSettings().getPorts();
