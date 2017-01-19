@@ -34,6 +34,7 @@ import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceStopDetector;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,9 +43,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_KEY;
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
+import static java.lang.Thread.sleep;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Specific implementation of {@link MachineProviderImpl} needed for hosted environment.
@@ -57,11 +62,16 @@ import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONS
  * @author Anton Korneta
  * @author Roman Iuvshyn
  * @author Alexander Garagatyi
+ * @author Mykola Morhun
  */
 public class HostedMachineProviderImpl extends MachineProviderImpl {
+    private static final Logger LOG = getLogger(HostedMachineProviderImpl.class);
+
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final MachineTokenRegistry                          tokenRegistry;
+
+    private final ExecutorService snapshotImagesCleanerService;
 
     @Inject
     public HostedMachineProviderImpl(DockerConnector docker,
@@ -116,6 +126,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.tokenRegistry = tokenRegistry;
+
+        this.snapshotImagesCleanerService = Executors.newFixedThreadPool(16);
     }
 
     @Override
@@ -166,6 +178,30 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
+            }
+            // We use build instead of pull because of better stability.
+            // When new image is built it pulls base image before. This operation is performed by docker build command.
+            // So, after build it is needed to cleanup base image if it is a snapshot.
+            if (service.getImage().contains(MACHINE_SNAPSHOT_PREFIX)) {
+                // Sometimes swarm cannot delete image after its pull during few seconds.
+                // To workaround that problem and avoid redundant delay on workspace start
+                // we must clean up snapshot image in separate thread.
+                // TODO remove this executor after fix of the problem in pure Docker Swarm
+                snapshotImagesCleanerService.submit(() -> {
+                    try {
+                        // This sleep is needed for swarm to see just pulled image. Otherwise deletion may fail.
+                        sleep(10_000);
+                        docker.removeImage(service.getImage());
+                    } catch (IOException e) {
+                        if (!e.getMessage().contains("No such image")) { // ignore error if image already deleted
+                            LOG.error("Failed to delete pulled snapshot: " + service.getImage());
+                        }
+                    } catch (InterruptedException e) {
+                        try {
+                            docker.removeImage(service.getImage());
+                        } catch (IOException ignore) { }
+                    }
+                });
             }
         }
     }
