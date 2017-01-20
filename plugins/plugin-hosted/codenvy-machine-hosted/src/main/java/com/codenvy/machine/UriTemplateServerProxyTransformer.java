@@ -35,8 +35,16 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
     private static final Logger LOG = getLogger(RemoteDockerNode.class);
 
     private final String serverUrlTemplate;
+
+    /**
+     * Value of CODENVY_HOST env variable
+     */
     private final String codenvyHost;
-    private final String externalAddressProperty;
+
+    /**
+     * Value of CHE_DOCKER_IP_EXTERNAL env variable. (optional then it can be null/empty)
+     */
+    private final String cheDockerIpExternal;
 
     /**
      * Template URI is used in {@link String#format(String, Object...)} with such arguments:
@@ -51,11 +59,13 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
      * Template should satisfy that invocation. Not all arguments have to be used.<br>
      * Modified server components will be retrieved from URI created by this operation.<br>
      * To avoid changing of server use template:http://%2$s:%3$s/%4$s
+     * @param codenvyHost that will be injected as %5 argument in template (unless cheDockerIpExternal is given)
+     * @param cheDockerIpExternal that will be injected as %5 argument in external template by replacing codenvy.host
      */
-    public UriTemplateServerProxyTransformer(String serverUrlTemplate, String codenvyHost, String externalAddressProperty) {
+    public UriTemplateServerProxyTransformer(String serverUrlTemplate, String codenvyHost, String cheDockerIpExternal) {
         this.serverUrlTemplate = serverUrlTemplate;
         this.codenvyHost = codenvyHost;
-        this.externalAddressProperty = externalAddressProperty;
+        this.cheDockerIpExternal = cheDockerIpExternal;
     }
 
     @Override
@@ -76,8 +86,8 @@ public abstract class UriTemplateServerProxyTransformer implements MachineServer
         // for example on macOS, codenvy.host is defaulted to 192.168.65.2 which is not reachable from host machine while
         // it needs to use localhost (external address).
         final String externalAddress;
-        if (!Strings.isNullOrEmpty(externalAddressProperty)) {
-            externalAddress = externalAddressProperty;
+        if (!Strings.isNullOrEmpty(cheDockerIpExternal)) {
+            externalAddress = cheDockerIpExternal;
         } else {
             externalAddress = codenvyHost;
         }
