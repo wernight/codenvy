@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_KEY;
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
@@ -131,6 +132,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         this.tokenRegistry = tokenRegistry;
 
         this.snapshotImagesCleanerService = createSnapshotImagesCleanerExecutor();
+
     }
 
     private ScheduledExecutorService createSnapshotImagesCleanerExecutor() {
@@ -208,8 +210,8 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
      *         image to clean, e.g. 172.11.12.13:5000/machine_snapshot_abcdef1234567890:latest
      */
     private void submitCleanSnapshotImageTask(String image) {
-        // TODO replace this executor after fix of the problem in pure Docker Swarm by docker.removeImage() call
-        snapshotImagesCleanerService.submit(() -> {
+        // TODO replace this method by docker.removeImage(image) call after fix of the problem in pure Docker Swarm
+        snapshotImagesCleanerService.schedule(() -> {
             try {
                 docker.removeImage(image);
             } catch (IOException e) {
@@ -217,7 +219,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                     LOG.error("Failed to delete pulled snapshot: " + image);
                 }
             }
-        });
+        }, 10, TimeUnit.SECONDS);
     }
 
     /**
