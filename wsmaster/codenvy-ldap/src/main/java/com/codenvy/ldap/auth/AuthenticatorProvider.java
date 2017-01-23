@@ -188,7 +188,7 @@ public class AuthenticatorProvider implements Provider<Authenticator> {
         checkRequiredProperty(DN_FORMAT_PROPERTY_NAME, dnFormat);
         final FormatDnResolver resolver = new FormatDnResolver(dnFormat);
         final Authenticator authn = new Authenticator(resolver, getPooledBindAuthenticationHandler(connFactory));
-        authn.setEntryResolver(entryResolver);
+//        authn.setEntryResolver(entryResolver);
         return authn;
     }
 
