@@ -16,6 +16,7 @@ package com.codenvy.machine;
 
 import com.codenvy.machine.authentication.server.MachineTokenRegistry;
 import com.google.common.base.MoreObjects;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.ServerConf;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
@@ -36,19 +38,20 @@ import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.MachineProviderImpl;
 import org.slf4j.Logger;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_KEY;
 import static com.codenvy.machine.MaintenanceConstraintProvider.MAINTENANCE_CONSTRAINT_VALUE;
-import static java.lang.Thread.sleep;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -71,7 +74,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final MachineTokenRegistry                          tokenRegistry;
 
-    private final ExecutorService snapshotImagesCleanerService;
+    private final ScheduledExecutorService snapshotImagesCleanerService;
 
     @Inject
     public HostedMachineProviderImpl(DockerConnector docker,
@@ -127,7 +130,15 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         this.dockerCredentials = dockerCredentials;
         this.tokenRegistry = tokenRegistry;
 
-        this.snapshotImagesCleanerService = Executors.newFixedThreadPool(16);
+        this.snapshotImagesCleanerService = createSnapshotImagesCleanerExecutor();
+    }
+
+    private ScheduledExecutorService createSnapshotImagesCleanerExecutor() {
+        return Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("SnapshotImagesCleaner")
+                                                                                    .setUncaughtExceptionHandler(
+                                                                                            LoggingUncaughtExceptionHandler.getInstance())
+                                                                                    .setDaemon(false)
+                                                                                    .build());
     }
 
     @Override
@@ -180,30 +191,33 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
                 FileCleaner.addFile(workDir);
             }
             // We use build instead of pull because of better stability.
-            // When new image is built it pulls base image before. This operation is performed by docker build command.
+            // When new image is being built it pulls base image. This operation is performed by docker build command.
             // So, after build it is needed to cleanup base image if it is a snapshot.
             if (service.getImage().contains(MACHINE_SNAPSHOT_PREFIX)) {
-                // Sometimes swarm cannot delete image after its pull during few seconds.
-                // To workaround that problem and avoid redundant delay on workspace start
-                // we must clean up snapshot image in separate thread.
-                // TODO remove this executor after fix of the problem in pure Docker Swarm
-                snapshotImagesCleanerService.submit(() -> {
-                    try {
-                        // This sleep is needed for swarm to see just pulled image. Otherwise deletion may fail.
-                        sleep(10_000);
-                        docker.removeImage(service.getImage());
-                    } catch (IOException e) {
-                        if (!e.getMessage().contains("No such image")) { // ignore error if image already deleted
-                            LOG.error("Failed to delete pulled snapshot: " + service.getImage());
-                        }
-                    } catch (InterruptedException e) {
-                        try {
-                            docker.removeImage(service.getImage());
-                        } catch (IOException ignore) { }
-                    }
-                });
+                submitCleanSnapshotImageTask(service.getImage());
             }
         }
+    }
+
+    /**
+     * Sometimes swarm cannot delete image after its pull during a few seconds.
+     * To workaround that problem and avoid redundant delay on workspace start
+     * we must clean up snapshot image in separate thread after some delay.
+     *
+     * @param image
+     *         image to clean, e.g. 172.11.12.13:5000/machine_snapshot_abcdef1234567890:latest
+     */
+    private void submitCleanSnapshotImageTask(String image) {
+        // TODO replace this executor after fix of the problem in pure Docker Swarm by docker.removeImage() call
+        snapshotImagesCleanerService.submit(() -> {
+            try {
+                docker.removeImage(image);
+            } catch (IOException e) {
+                if (!e.getMessage().contains("No such image")) { // ignore error if image already deleted
+                    LOG.error("Failed to delete pulled snapshot: " + image);
+                }
+            }
+        });
     }
 
     /**
@@ -251,4 +265,22 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
             }
         }
     }
+
+    @PreDestroy
+    private void preDestroy() {
+        finalizeSnapshotImagesCleaner();
+    }
+
+    /**
+     * Tries to clean up snapshots images which is in the cleaner queue, but were canceled due to server stopping.
+     * To avoid freezing of server on stop performs post clean in separate thread.
+     */
+    private void finalizeSnapshotImagesCleaner() {
+        List<Runnable> queue = snapshotImagesCleanerService.shutdownNow();
+        Thread snapshotsCleaner = new Thread(() -> queue.forEach(Runnable::run));
+        snapshotsCleaner.setDaemon(true);
+        snapshotsCleaner.setName("PostSnapshotImagesCleaner");
+        snapshotsCleaner.start();
+    }
+
 }
