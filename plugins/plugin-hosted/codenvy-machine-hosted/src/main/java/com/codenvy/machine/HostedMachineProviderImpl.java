@@ -131,16 +131,11 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         this.dockerCredentials = dockerCredentials;
         this.tokenRegistry = tokenRegistry;
 
-        this.snapshotImagesCleanerService = createSnapshotImagesCleanerExecutor();
-
-    }
-
-    private ScheduledExecutorService createSnapshotImagesCleanerExecutor() {
-        return Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("SnapshotImagesCleaner")
-                                                                                    .setUncaughtExceptionHandler(
-                                                                                            LoggingUncaughtExceptionHandler.getInstance())
-                                                                                    .setDaemon(false)
-                                                                                    .build());
+        this.snapshotImagesCleanerService = Executors.newSingleThreadScheduledExecutor(
+                new ThreadFactoryBuilder().setNameFormat("SnapshotImagesCleaner")
+                                          .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                                          .setDaemon(false)
+                                          .build());
     }
 
     @Override
@@ -192,7 +187,6 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
             }
-            // We use build instead of pull because of better stability.
             // When new image is being built it pulls base image. This operation is performed by docker build command.
             // So, after build it is needed to cleanup base image if it is a snapshot.
             if (service.getImage().contains(MACHINE_SNAPSHOT_PREFIX)) {
@@ -281,7 +275,7 @@ public class HostedMachineProviderImpl extends MachineProviderImpl {
         List<Runnable> queue = snapshotImagesCleanerService.shutdownNow();
         Thread snapshotsCleaner = new Thread(() -> queue.forEach(Runnable::run));
         snapshotsCleaner.setDaemon(true);
-        snapshotsCleaner.setName("PostSnapshotImagesCleaner");
+        snapshotsCleaner.setName("PreDestroySnapshotImagesCleaner");
         snapshotsCleaner.start();
     }
 
